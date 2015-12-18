@@ -2932,7 +2932,6 @@ int drm_dp_mst_topology_mgr_init(struct drm_dp_mst_topology_mgr *mgr,
 	mutex_init(&mgr->lock);
 	mutex_init(&mgr->qlock);
 	mutex_init(&mgr->payload_lock);
-	mutex_init(&mgr->destroy_connector_lock);
 	INIT_LIST_HEAD(&mgr->tx_msg_downq);
 	INIT_LIST_HEAD(&mgr->destroy_connector_list);
 	INIT_WORK(&mgr->work, drm_dp_mst_link_probe_work);
