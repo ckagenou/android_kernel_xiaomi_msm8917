@@ -677,11 +677,8 @@ int intel_setup_gmbus(struct drm_device *dev)
 	return 0;
 
 err:
-	while (pin--) {
-		if (!intel_gmbus_is_valid_pin(dev_priv, pin))
-			continue;
-
-		bus = &dev_priv->gmbus[pin];
+	while (i--) {
+		struct intel_gmbus *bus = &dev_priv->gmbus[i];
 		i2c_del_adapter(&bus->adapter);
 	}
 	return ret;
