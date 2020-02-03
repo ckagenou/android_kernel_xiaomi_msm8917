@@ -457,8 +457,7 @@ static int si470x_i2c_remove(struct i2c_client *client)
 
 	free_irq(client->irq, radio);
 	video_unregister_device(&radio->videodev);
-	kfree(radio);
-
+    kfree(radio);
 	return 0;
 }
 
