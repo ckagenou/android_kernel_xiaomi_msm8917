@@ -1081,6 +1081,7 @@ static int fts_ts_probe(struct i2c_client *client, const struct i2c_device_id *i
 	fts_input_dev = input_dev;
 
 	spin_lock_init(&fts_wq_data->irq_lock);
+	device_enable_async_suspend(&client->dev);
 	mutex_init(&fts_wq_data->report_mutex);
 
 	fts_input_dev_init(client, data, input_dev, pdata);
