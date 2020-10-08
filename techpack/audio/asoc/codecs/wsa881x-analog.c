@@ -773,8 +773,12 @@ static int wsa881x_rdac_event(struct snd_soc_dapm_widget *w,
 			wsa881x_visense_adc_ctrl(codec, false);
 			wsa881x_visense_txfe_ctrl(codec, false,
 						0x00, 0x01, 0x00);
+#ifndef CONFIG_MACH_XIAOMI_ULYSSE
 			ret = msm_cdc_pinctrl_select_sleep_state(
 						wsa881x->wsa_vi_gpio_p);
+#else
+			ret = 0;
+#endif
 			if (ret) {
 				pr_err("%s: gpio set cannot be suspended %s\n",
 					__func__, "wsa_vi");
@@ -1143,8 +1147,12 @@ static int wsa881x_reset(struct wsa881x_pdata *pdata, bool enable)
 	} else {
 		if (!pdata->wsa_active)
 			return 0;
+#ifndef CONFIG_MACH_XIAOMI_ULYSSE
 		ret = msm_cdc_pinctrl_select_sleep_state(
 					pdata->wsa_reset_gpio_p);
+#else
+		ret = 0;
+#endif
 		if (ret) {
 			pr_err("%s: gpio set cannot be suspended %s\n",
 				__func__, "wsa_reset");
