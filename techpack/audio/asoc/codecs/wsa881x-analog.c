@@ -947,7 +947,11 @@ static int wsa881x_shutdown(struct wsa881x_pdata *pdata)
 		}
 	}
 
+#ifndef CONFIG_MACH_XIAOMI_ULYSSE
 	ret = msm_cdc_pinctrl_select_sleep_state(pdata->wsa_clk_gpio_p);
+#else
+	ret = 0;
+#endif
 	if (ret) {
 		pr_err("%s: gpio set cannot be suspended %s\n",
 			__func__, "wsa_clk");
