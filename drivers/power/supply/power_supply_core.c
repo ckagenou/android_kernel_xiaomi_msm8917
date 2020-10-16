@@ -399,6 +399,40 @@ struct power_supply *power_supply_get_by_name(const char *name)
 EXPORT_SYMBOL_GPL(power_supply_get_by_name);
 
 /**
+ * power_supply_set_present - set present state of the power supply
+ * @psy:	the power supply to control
+ * @enable:	sets present property of power supply
+ */
+int power_supply_set_present(struct power_supply *psy, bool enable)
+{
+	const union power_supply_propval ret = {enable,};
+
+	if (psy->desc->set_property)
+		return psy->desc->set_property(psy, POWER_SUPPLY_PROP_PRESENT,
+								&ret);
+
+	return -ENXIO;
+}
+EXPORT_SYMBOL_GPL(power_supply_set_present);
+
+/**
+ * power_supply_set_online - set online state of the power supply
+ * @psy:	the power supply to control
+ * @enable:	sets online property of power supply
+ */
+int power_supply_set_online(struct power_supply *psy, bool enable)
+{
+	const union power_supply_propval ret = {enable,};
+
+	if (psy->desc->set_property)
+		return psy->desc->set_property(psy, POWER_SUPPLY_PROP_ONLINE,
+								&ret);
+
+	return -ENXIO;
+}
+EXPORT_SYMBOL_GPL(power_supply_set_online);
+
+/**
  * power_supply_put() - Drop reference obtained with power_supply_get_by_name
  * @psy: Reference to put
  *

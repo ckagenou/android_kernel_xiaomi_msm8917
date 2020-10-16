@@ -76,6 +76,8 @@ enum {
 	JEITA		= BIT(1),
 	BATT_FC		= BIT(2),
 	BATT_PRES	= BIT(3),
+	SOC		= BIT(4),
+	CURRENT		= BIT(5),
 };
 
 enum wakeup_src {
@@ -136,6 +138,7 @@ struct bq2560x {
 
 	bool batt_present;
 	bool usb_present;
+	int  batt_capacity;
 
 	bool batt_full;
 
@@ -785,6 +788,21 @@ static int bq2560x_get_prop_batt_present(struct bq2560x *bq)
 
 }
 
+static int bq2560x_get_prop_batt_capacity(struct bq2560x *bq)
+{
+	union power_supply_propval batt_prop = {0,};
+	int ret;
+
+	ret = bq2560x_get_batt_property(bq,
+					POWER_SUPPLY_PROP_CAPACITY, &batt_prop);
+
+	if (!ret)
+		bq->batt_capacity = batt_prop.intval;
+
+	return ret;
+
+}
+
 static int bq2560x_get_prop_batt_full(struct bq2560x *bq)
 {
 	union power_supply_propval batt_prop = {0,};
@@ -1297,6 +1315,11 @@ static void bq2560x_external_power_changed(struct power_supply *psy)
 	if (bq->usb_psy_ma != current_limit) {
 		bq->usb_psy_ma = current_limit;
 		bq2560x_update_charging_profile(bq);
+		if (current_limit <= 2) {
+			bq2560x_charging_disable(bq, CURRENT, 1);
+		} else {
+			bq2560x_charging_disable(bq, CURRENT, 0);
+		}
 	} else {
         bq2560x_update_charging_profile(bq);
     }
@@ -1313,12 +1336,12 @@ static void bq2560x_external_power_changed(struct power_supply *psy)
 	if (bq->usb_present) {
 		if (prop.intval == 0) {
 			pr_err("set usb online\n");
-			ret = 1;
+			ret = power_supply_set_online(bq->usb_psy, true);
 		}
 	} else {
 		if (prop.intval == 1) {
 			pr_err("set usb offline\n");
-			ret = 0;
+			ret = power_supply_set_online(bq->usb_psy, false);
 		}
 	}
 
@@ -1894,7 +1917,7 @@ static void bq2560x_check_jeita(struct bq2560x *bq)
 
 	jeita_hot_cold = bq->jeita_active && (bq->batt_hot || bq->batt_cold);
 	chg_disabled_jeita = !!(bq->charging_disabled_status & JEITA);
-	if (jeita_hot_cold != chg_disabled_jeita)
+	if (jeita_hot_cold ^ chg_disabled_jeita)
 		bq2560x_charging_disable(bq, JEITA, jeita_hot_cold);
 
 }
@@ -1907,7 +1930,7 @@ static void bq2560x_check_batt_pres(struct bq2560x *bq)
 	ret = bq2560x_get_prop_batt_present(bq);
 	if (!ret) {
 		chg_disabled_pres = !!(bq->charging_disabled_status & BATT_PRES);
-		if (chg_disabled_pres != (!bq->batt_present)) {
+		if (chg_disabled_pres ^ !bq->batt_present) {
 			ret = bq2560x_charging_disable(bq, BATT_PRES, !bq->batt_present);
 			if (ret) {
 				pr_err("failed to %s charging, ret = %d\n",
@@ -1921,6 +1944,21 @@ static void bq2560x_check_batt_pres(struct bq2560x *bq)
 
 }
 
+static void bq2560x_check_batt_capacity(struct bq2560x *bq)
+{
+	int ret = 0;
+	int last_batt_capacity = bq->batt_capacity;
+
+	ret = bq2560x_get_prop_batt_capacity(bq);
+	if (!ret) {
+		if (last_batt_capacity != bq->batt_capacity) {
+			pr_err("Battery capacity changed, new capacity = %d\n", bq->batt_capacity);
+			power_supply_changed(bq->batt_psy);
+		}
+	}
+
+}
+
 static void bq2560x_check_batt_full(struct bq2560x *bq)
 {
 	int ret = 0;
@@ -1929,7 +1967,7 @@ static void bq2560x_check_batt_full(struct bq2560x *bq)
 	ret = bq2560x_get_prop_batt_full(bq);
 	if (!ret) {
 		chg_disabled_fc = !!(bq->charging_disabled_status & BATT_FC);
-		if (chg_disabled_fc != bq->batt_full) {
+		if (chg_disabled_fc ^ bq->batt_full) {
 			ret = bq2560x_charging_disable(bq, BATT_FC, bq->batt_full);
 			if (ret) {
 				pr_err("failed to %s charging, ret = %d\n",
@@ -1995,6 +2033,7 @@ static void bq2560x_charge_jeita_workfunc(struct work_struct *work)
 
 	bq2560x_check_batt_pres(bq);
 	bq2560x_check_batt_full(bq);
+	bq2560x_check_batt_capacity(bq);
 	bq2560x_dump_fg_reg(bq);
 
 	bq2560x_check_jeita(bq);
@@ -2010,6 +2049,7 @@ static void bq2560x_discharge_jeita_workfunc(struct work_struct *work)
 
 	bq2560x_check_batt_pres(bq);
 	bq2560x_check_batt_full(bq);
+	bq2560x_check_batt_capacity(bq);
 	bq2560x_dump_fg_reg(bq);
 
 	bq2560x_check_jeita(bq);
@@ -2517,7 +2557,7 @@ static int bq2560x_charger_probe(struct i2c_client *client,
 	struct bq2560x *bq;
 	struct power_supply *bms_psy;
 
-	int ret = -1;
+	int ret = 0;
 
 	bms_psy = power_supply_get_by_name("bms");
 	if (!bms_psy) {
