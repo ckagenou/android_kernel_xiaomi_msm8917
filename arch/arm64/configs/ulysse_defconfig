@@ -678,6 +678,7 @@ CONFIG_LD_LLD=y
 CONFIG_LTO=y
 CONFIG_LTO_CLANG=y
 CONFIG_LLVM_POLLY=y
+CONFIG_BOEFFLA_WL_BLOCKER=y
 
 # ulysse
 CONFIG_CMDLINE="androidboot.usbconfigfs=true ramoops_memreserve=4M"
