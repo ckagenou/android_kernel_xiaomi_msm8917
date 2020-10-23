@@ -4,23 +4,23 @@
 ## AnyKernel setup
 # begin properties
 properties() { '
-kernel.string=ExampleKernel by osm0sis @ xda-developers
+kernel.string=
 do.devicecheck=1
 do.modules=0
 do.systemless=1
 do.cleanup=1
 do.cleanuponabort=0
-device.name1=maguro
-device.name2=toro
-device.name3=toroplus
-device.name4=tuna
+device.name1=ugg
+device.name2=ugglite
+device.name3=ulysse
+device.name4=
 device.name5=
 supported.versions=
 supported.patchlevels=
 '; } # end properties
 
 # shell variables
-block=/dev/block/platform/omap/omap_hsmmc.0/by-name/boot;
+block=/dev/block/bootdevice/by-name/boot;
 is_slot_device=0;
 ramdisk_compression=auto;
 
@@ -29,6 +29,16 @@ ramdisk_compression=auto;
 # import patching functions/variables - see for reference
 . tools/ak3-core.sh;
 
+# Print kernel information
+ui_print " "
+ui_print "  [[      Mirai Kernel Installation      ]]"
+ui_print "  >> Version     : v3-amaryllis"
+ui_print "  >> Device      : ugg/ugglite (unified)"
+ui_print "  >> Kernel ver. : 4.9.x"
+ui_print "  >> Date        : 24 Oct 2020"
+ui_print "  >> By          : ckagenou"
+ui_print " "
+ui_print "  "
 
 ## AnyKernel file attributes
 # set permissions/ownership for included ramdisk files
