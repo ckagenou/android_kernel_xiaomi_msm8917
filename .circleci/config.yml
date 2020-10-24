@@ -16,7 +16,9 @@ jobs:
            git clone https://github.com/ckagenou/android_kernel_xiaomi_msm8937 -b anykernel3 ../AK3
            git clone https://github.com/kdrag0n/proton-clang ../proton-clang --depth=1
            mkdir ../upload
-           chmod +x ./mirai/clang-build.sh
+           ls
+           cat $(pwd)
+           chmod +x mirai/clang-build.sh
       - run:
           name: Building...
           command: |
