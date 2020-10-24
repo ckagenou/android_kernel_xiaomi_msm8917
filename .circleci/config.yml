@@ -20,7 +20,7 @@ jobs:
       - run:
           name: Building...
           command: |
-            bash ./mirai/clang-build.sh -c $CHAT_ID -t $TG_TOKEN -d $DEFCONFIG -p ../proton-clang/bin -v $MIRAI_VERSION
+            bash ./mirai/clang-build.sh -c $CHAT_ID -t $TG_TOKEN -d $DEFCONFIG -p ../proton-clang/bin -v $MIRAI_VERSION -n $CIRCLE_BUILD_NUM
 
       - run:
            name: Run on fail status
