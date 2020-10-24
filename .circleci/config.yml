@@ -13,9 +13,11 @@ jobs:
           name: Downloading deps...
           command: |
            apt-get -y update && apt-get -y upgrade && apt-get -y install python3-setuptools python3-pip python3 python bc bison build-essential curl flex g++-multilib gcc gcc-multilib clang git gnupg gperf imagemagick lib32ncurses5-dev lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libwxgtk3.0-dev libxml2 libxml2-utils lzop pngcrush schedtool squashfs-tools xsltproc zip zlib1g-dev unzip openjdk-8-jdk python ccache libtinfo5 repo libstdc++6 wget libssl-dev rsync golang-go
-           git clone https://github.com/ckagenou/android_kernel_xiaomi_msm8937 -b anykernel3 ../AK3
-           git clone https://github.com/kdrag0n/proton-clang ../proton-clang --depth=1
-           mkdir ../upload
+           git clone https://github.com/ckagenou/android_kernel_xiaomi_msm8937 ulysse --depth=5
+           git clone https://github.com/ckagenou/android_kernel_xiaomi_msm8937 -b anykernel3 AK3 --depth=1
+           git clone https://github.com/kdrag0n/proton-clang proton-clang --depth=1
+           mkdir upload
+           cd ulysse
            ls -la $(pwd)
            ls -la $(pwd)/../
            echo $(pwd)
@@ -23,7 +25,7 @@ jobs:
       - run:
           name: Building...
           command: |
-            bash ./mirai/clang-build.sh -c $CHAT_ID -t $TG_TOKEN -d $DEFCONFIG -p ../proton-clang/bin -v $MIRAI_VERSION -n $CIRCLE_BUILD_NUM
+            bash mirai/clang-build.sh -c $CHAT_ID -t $TG_TOKEN -d $DEFCONFIG -p ../proton-clang/bin -v $MIRAI_VERSION -n $CIRCLE_BUILD_NUM
 
       - run:
            name: Run on fail status
