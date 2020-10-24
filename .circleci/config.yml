@@ -27,7 +27,7 @@ jobs:
           command: |
             echo $(pwd)
             cd ulysse
-            bash mirai/clang-build.sh -c $CHAT_ID -t $TG_TOKEN -d $DEFCONFIG -p ../proton-clang/bin -v $MIRAI_VERSION -n $CIRCLE_BUILD_NUM
+            bash mirai/clang-build.sh -c $CHAT_ID -t $TG_TOKEN -d $DEFCONFIG -p "/root/project/proton-clang/bin" -v $MIRAI_VERSION -n $CIRCLE_BUILD_NUM
 
       - run:
            name: Run on fail status
